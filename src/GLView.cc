@@ -506,58 +506,77 @@ void GLView::showScalemarkers(const Color4f &col)
     glLineWidth(this->getDPI());
     glColor3f(col[0], col[1], col[2]);
 
+    // determine the log value to provide proportional tics
     int log_l = (int)log10(l);
+
+    // j represents the increment for each minor tic
     double j = 10;
-    j = pow(j,log_l-1);
-    int size_div_sm = 60; // divisor for l to determine tic size
+    // deal with 0 log values
+    if (l < 1.5){
+        j = pow(10,log_l-2);
+    } else {
+        j = pow(10,log_l-1);
+    }
+
+    int size_div_sm = 60;       // divisor for l to determine minor tic size
     int size_div = size_div_sm;
     int line_cnt = 0;
 
-    for (double i=0;i<l;i+=j){
-        if (line_cnt++ == 10){
-           size_div = size_div_sm * .5;
-           line_cnt = 1;
-        } else {
-           size_div = size_div_sm;
+    for (double i=0;i<l;i+=j){      // i represents the position along the axis
+        if (line_cnt++ == 10){      // major tic
+           size_div = size_div_sm * .5; // resize to a major tic
+           line_cnt = 1;                // reset the major tic counter
+        } else {                    // minor tic
+           size_div = size_div_sm;      // set the minor tic to the standard size
         }
 
+        /*
+         * The length of each tic is proportional to the length of the axis
+         * (which changes with the zoom value.)  l/size_div provides the
+         * proportional length
+         *
+         * Commented glVertex3d lines provide additional 'arms' for the tic
+         * the number of arms will (hopefully) eventually be driven via Preferences
+         */
+
+        // positive axes
         glBegin(GL_LINES);
-        glVertex3d(i,-l/size_div,0);
-        glVertex3d(i,l/size_div,0);
-        glVertex3d(i,0,-l/size_div);
-        glVertex3d(i,0,l/size_div);
+        // x
+        glVertex3d(i,0,0); glVertex3d(i,-l/size_div,0); // 1 arm
+        //glVertex3d(i,-l/size_div,0); glVertex3d(i,l/size_div,0); // 2 arms
+        //glVertex3d(i,0,-l/size_div); glVertex3d(i,0,l/size_div); // 4 arms (w/ 2 arms line)
 
-        glVertex3d(-l/size_div,i,0);
-        glVertex3d(l/size_div,i,0);
-        glVertex3d(0,i,-l/size_div);
-        glVertex3d(0,i,l/size_div);
+        // y
+        glVertex3d(0,i,0); glVertex3d(-l/size_div,i,0); // 1 arm
+        //glVertex3d(-l/size_div,i,0); glVertex3d(l/size_div,i,0); // 2 arms
+        //glVertex3d(0,i,-l/size_div); glVertex3d(0,i,l/size_div); // 4 arms (w/ 2 arms line)
 
-        glVertex3d(-l/size_div,0,i);
-        glVertex3d(l/size_div,0,i);
-        glVertex3d(0,-l/size_div,i);
-        glVertex3d(0,l/size_div,i);
+        // z
+        glVertex3d(0,0,i); glVertex3d(-l/size_div,0,i); // 1 arm
+        //glVertex3d(-l/size_div,0,i); glVertex3d(l/size_div,0,i); // 2 arms
+        //glVertex3d(0,-l/size_div,i); glVertex3d(0,l/size_div,i); // 4 arms (w/ 2 arms line)
         glEnd();
 
+        // negative axes
         glPushAttrib(GL_LINE_BIT);
         glEnable(GL_LINE_STIPPLE);
         glLineStipple(3, 0xAAAA);
         glBegin(GL_LINES);
-        glVertex3d(-i,-l/size_div,0);
-        glVertex3d(-i,l/size_div,0);
-        glVertex3d(-i,0,-l/size_div);
-        glVertex3d(-i,0,l/size_div);
+        // x
+        glVertex3d(-i,0,0); glVertex3d(-i,-l/size_div,0); // 1 arm
+        //glVertex3d(-i,-l/size_div,0); glVertex3d(-i,l/size_div,0); // 2 arms
+        //glVertex3d(-i,0,-l/size_div); glVertex3d(-i,0,l/size_div); // 4 arms (w/ 2 arms line)
 
-        glVertex3d(0,-i,-l/size_div);
-        glVertex3d(0,-i,l/size_div);
-        glVertex3d(-l/size_div,-i,0);
-        glVertex3d(l/size_div,-i,0);
+        // y
+        glVertex3d(0,-i,0); glVertex3d(-l/size_div,-i,0); // 1 arm
+        //glVertex3d(-l/size_div,-i,0); glVertex3d(l/size_div,-i,0); // 2 arms
+        //glVertex3d(0,-i,-l/size_div); glVertex3d(0,-i,l/size_div); // 4 arms (w/ 2 arms line)
 
-        glVertex3d(0,-l/size_div,-i);
-        glVertex3d(0,l/size_div,-i);
-        glVertex3d(-l/size_div,0,-i);
-        glVertex3d(l/size_div,0,-i);
+        // z
+        glVertex3d(0,0,-i); glVertex3d(-l/size_div,0,-i); // 1 arm
+        //glVertex3d(-l/size_div,0,-i); glVertex3d(l/size_div,0,-i); // 2 arms
+        //glVertex3d(0,-l/size_div,-i); glVertex3d(0,l/size_div,-i); // 4 arms (w/ 2 arms line)
         glEnd();
         glPopAttrib();
     }
 }
-
