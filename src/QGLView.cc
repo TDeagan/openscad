@@ -260,11 +260,13 @@ void QGLView::mouseMoveEvent(QMouseEvent *event)
       // Shift-right and Shift-middle zooms
       if ((QApplication::keyboardModifiers() & Qt::ShiftModifier) != 0) {
         cam.viewer_distance += (GLdouble)dy;
+        // change to zoom mouse cursor
+        override_cursor_stack++;
+        QApplication::setOverrideCursor(QCursor(QPixmap(QLatin1String(":/images/zoom_cursor.png")), 16, 16));
       } else {
 
       // change to translate mouse cursor
       override_cursor_stack++;
-      //QApplication::setOverrideCursor(QCursor(QPixmap(QLatin1String(":/images/plain_pan.png")), 2, 3));
       QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
 
       double mx = +(dx) * cam.viewer_distance/1000;
